@@ -14,6 +14,18 @@ function Router() {
 
 Router.prototype = {
 
+    closestA: function(start) {
+        var parent = start.parentNode;
+        while (parent!=document.body) {
+            if (parent && parent.nodeName == 'A') {
+                return parent;
+            } else {
+                parent = parent.parentNode;
+            }
+        }
+        return null;
+    },
+
     get: function(pattern, handler) {
         this.routeMap[pattern] = handler
     },
@@ -51,11 +63,17 @@ Router.prototype = {
 
     handleClicks: function(e) {
         var element = e.target,
-            href, target, isAnchor, isRelative, isLocal;
+            href, target, isAnchor, isRelative, isLocal, anchor;
 
         if (element && element.nodeName == 'A') {
-            href = element.attributes.href && element.attributes.href.textContent;
-            target = element.attributes.target && element.attributes.target.textContent;
+            anchor = element;
+        } else {
+            anchor = this.closestA(e.target); // returns null if no A is found
+        }
+
+        if (anchor) {
+            href = anchor.attributes.href && anchor.attributes.href.textContent;
+            target = anchor.attributes.target && anchor.attributes.target.textContent;
             isAnchor = href.indexOf('#') === 0;
             isRelative = href.indexOf('http') !== 0;
             isLocal = href.indexOf(location.origin) === 0;

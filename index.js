@@ -16,7 +16,7 @@ Router.prototype = {
 
     closestA: function(start) {
         var parent = start.parentNode;
-        while (parent!=document.body) {
+        while (parent != document.body && parent) {
             if (parent && parent.nodeName == 'A') {
                 return parent;
             } else {
@@ -44,9 +44,11 @@ Router.prototype = {
         for (pattern in this.routeMap) {
             if (params = this._match(pattern, path)) {
                 this.routeMap[pattern](params);
-                break;
+                return;
             }
         }
+
+        throw '66: Route does not exist'
     },
 
     start: function() {

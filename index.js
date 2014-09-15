@@ -47,8 +47,6 @@ Router.prototype = {
                 return;
             }
         }
-
-        throw '66: Route does not exist'
     },
 
     start: function() {

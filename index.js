@@ -26,14 +26,24 @@ Router.prototype = {
         return null;
     },
 
+    _dropTrailingSlash: function(pattern) {
+        if (pattern[pattern.length - 1] === '/') {
+            return pattern.substring(0, pattern.length);
+        }
+
+        return pattern;
+    },
+
     get: function(pattern, handler) {
-        this.routeMap[pattern] = handler
+        this.routeMap[this._dropTrailingSlash(pattern)] = handler
     },
 
     goto: function(path) {
-        var params, pattern;
+        var params, pattern, pathWithoutQueryString;
 
-        if (path !== location.pathname) {
+        path = this._dropTrailingSlash(path);
+
+        if (path !== this._dropTrailingSlash(location.pathname)) {
             if (supportsPushState) {
                 history.pushState({}, '', path);
             } else {
@@ -41,8 +51,11 @@ Router.prototype = {
                 return;
             }
         }
+
+        pathWithoutQueryString = path.split('?')[0];
+
         for (pattern in this.routeMap) {
-            if (params = this._match(pattern, path)) {
+            if (params = this._match(pattern, pathWithoutQueryString)) {
                 this.routeMap[pattern](params);
                 return;
             }
@@ -93,9 +106,9 @@ Router.prototype = {
     },
 
     _match: function(pattern, url) {
-        var varnames = pattern.match(/(:[a-zA-Z0-9]+)/g),
-            re = new RegExp('^' + pattern.replace(/(:[a-zA-Z0-9]+)/g,
-                '([a-zA-Z0-9]+)') + '$'),
+        var varnames = pattern.match(/(:[a-zA-Z0-9_-]+)/g),
+            re = new RegExp('^' + pattern.replace(/(:[a-zA-Z0-9_-]+)/g,
+                '([a-zA-Z0-9_-]+)') + '/?$'),
             match = url.match(re),
             params = {},
             i = 1,
